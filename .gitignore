@@ -250,3 +250,4 @@ $RECYCLE.BIN/
 
 events/*.json
 dependencies
+*.deb
