@@ -92,6 +92,19 @@ const Document: React.FC = () => {
         },
       }
     );
+
+    // just check if endpoint was hit
+    await API.post(
+      "serverless-pdf-chat",
+      `/info/${conversation?.document.documentid}/${conversation?.conversationid}`,
+      {
+        body: {
+          fileName: conversation?.document.filename,
+          prompt: prompt,
+        },
+      }
+    );
+    //end check
     setPrompt("");
     fetchData(conversation?.conversationid);
     setMessageStatus("idle");

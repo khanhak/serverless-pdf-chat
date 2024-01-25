@@ -357,6 +357,39 @@ Resources:
             Path: /{documentid}/{conversationid}
             Method: POST
 
+  GenerateInfoFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/generate_info/
+      Timeout: 500
+      MemorySize: 2048
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref MemoryTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref MemoryTable2
+        - S3CrudPolicy:
+            BucketName: !Ref DocumentBucket
+        - Statement:
+            - Sid: "BedrockScopedAccess"
+              Effect: "Allow"
+              Action: "bedrock:InvokeModel"
+              Resource:
+                - "arn:aws:bedrock:*::foundation-model/anthropic.claude-v2"
+                - "arn:aws:bedrock:*::foundation-model/amazon.titan-embed-text-v1"
+      Environment:
+        Variables:
+          MEMORY_TABLE: !Ref MemoryTable
+          MEMORY_TABLE2: !Ref MemoryTable2
+          BUCKET: !Ref DocumentBucket
+      Events:
+        Root:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /info/{documentid}/{conversationid}
+            Method: POST
+
   AmplifyApp:
     Type: AWS::Amplify::App
     Condition: DeployToAmplifyHosting
