@@ -23,7 +23,7 @@ logger = Logger()
 def lambda_handler(event, context):
     event_body = json.loads(event["body"])
     file_name = event_body["fileName"]
-    human_input = event_body["prompt"]
+    # human_input = event_body["prompt"]
     conversation_id = event["pathParameters"]["conversationid"]
 
     user = event["requestContext"]["authorizer"]["claims"]["sub"]
@@ -46,20 +46,20 @@ def lambda_handler(event, context):
     )
     faiss_index = FAISS.load_local("/tmp", embeddings)
 
-    message_history = DynamoDBChatMessageHistory(
-        table_name=MEMORY_TABLE, session_id=conversation_id
-    )
+    # message_history = DynamoDBChatMessageHistory(
+    #     table_name=MEMORY_TABLE, session_id=conversation_id
+    # )
     message_history2 = DynamoDBChatMessageHistory(
         table_name=MEMORY_TABLE2, session_id=conversation_id
     )
 
-    memory = ConversationBufferMemory(
-        memory_key="chat_history",
-        chat_memory=message_history,
-        input_key="question",
-        output_key="answer",
-        return_messages=True,
-    )
+    # memory = ConversationBufferMemory(
+    #     memory_key="chat_history",
+    #     chat_memory=message_history,
+    #     input_key="question",
+    #     output_key="answer",
+    #     return_messages=True,
+    # )
     memory2 = ConversationBufferMemory(
         memory_key="chat_history",
         chat_memory=message_history2,
@@ -68,12 +68,12 @@ def lambda_handler(event, context):
         return_messages=True,
     )
 
-    qa = ConversationalRetrievalChain.from_llm(
-        llm=llm,
-        retriever=faiss_index.as_retriever(),
-        memory=memory,
-        return_source_documents=True,
-    )
+    # qa = ConversationalRetrievalChain.from_llm(
+    #     llm=llm,
+    #     retriever=faiss_index.as_retriever(),
+    #     memory=memory,
+    #     return_source_documents=True,
+    # )
     qa2 = ConversationalRetrievalChain.from_llm(
         llm=llm,
         retriever=faiss_index.as_retriever(),
@@ -81,9 +81,12 @@ def lambda_handler(event, context):
         return_source_documents=True,
     )
 
-    res = qa({"question": human_input})
-    res2 = qa2({"question": human_input})
-    logger.info({"res": [res, res2]})
+    # res = qa({"question": human_input})
+    age_query = qa2({"question": "What is the patient's age?"})
+    res_arr = []
+    res_arr.append(age_query["answer"])
+
+    logger.info({"res": age_query})
 
     return {
         "statusCode": 200,
@@ -93,5 +96,5 @@ def lambda_handler(event, context):
             "Access-Control-Allow-Origin": "*",
             "Access-Control-Allow-Methods": "*",
         },
-        "body": json.dumps(res["answer"]),
+        "body": json.dumps(str(res_arr)),
     }
