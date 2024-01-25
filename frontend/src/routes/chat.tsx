@@ -18,7 +18,7 @@ const Document: React.FC = () => {
   >("idle");
   const [prompt, setPrompt] = useState("");
   const [gotInfo, setGotInfo] = useState(0); //bool to determine if we've already gotten the patient info or not from the /info API call
-
+  const [info, setInfo] = useState("nothing yet...");
   const fetchData = async (conversationid = params.conversationid) => {
     setLoading("loading");
     const conversation = await API.get(
@@ -93,10 +93,13 @@ const Document: React.FC = () => {
         },
       }
     );
+    console.log("docid", conversation?.document.documentid);
+    console.log("conv id", conversation?.conversationid);
 
     // just check if endpoint was hit
     if (gotInfo === 0) {
-      const patient_info = await API.post(
+      console.log("posting patient");
+      API.post(
         "serverless-pdf-chat",
         `/info/${conversation?.document.documentid}/${conversation?.conversationid}`,
         {
@@ -105,9 +108,11 @@ const Document: React.FC = () => {
             prompt: prompt,
           },
         }
-      );
-      console.log("response info", patient_info);
-      setGotInfo(1);
+      ).then((response) => {
+        console.log("response infodd", response);
+        setInfo(response);
+      });
+      // setGotInfo(1);
     }
     //end check
     setPrompt("");
@@ -141,6 +146,7 @@ const Document: React.FC = () => {
           />
         </div>
       )}
+      <>{JSON.stringify(info)}</>
     </div>
   );
 };
