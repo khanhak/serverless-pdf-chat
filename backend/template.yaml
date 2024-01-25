@@ -130,6 +130,18 @@ Resources:
         - AttributeName: SessionId
           AttributeType: S
       BillingMode: PAY_PER_REQUEST
+  MemoryTable2:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      KeySchema:
+        - AttributeName: SessionId
+          KeyType: HASH
+      AttributeDefinitions:
+        - AttributeName: SessionId
+          AttributeType: S
+      BillingMode: PAY_PER_REQUEST
 
   CognitoUserPool:
     Type: AWS::Cognito::UserPool
@@ -321,6 +333,8 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref MemoryTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref MemoryTable2
         - S3CrudPolicy:
             BucketName: !Ref DocumentBucket
         - Statement:
@@ -333,6 +347,7 @@ Resources:
       Environment:
         Variables:
           MEMORY_TABLE: !Ref MemoryTable
+          MEMORY_TABLE2: !Ref MemoryTable2
           BUCKET: !Ref DocumentBucket
       Events:
         Root:
